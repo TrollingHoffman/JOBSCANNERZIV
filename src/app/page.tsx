@@ -39,6 +39,12 @@ export default async function Home({ searchParams }: { searchParams: { view?: st
     db.from('scan_runs').select('*', { count: 'exact', head: true }).then((r) => r.count ?? 0),
   ]);
 
+  // הוגשו לפני חמישה ימים או יותר ועדיין לא נשלחה פנייה
+  const nudgeCutoff = new Date(Date.now() - 5 * 86400000).toISOString();
+  const needFollowUp = await jobCount((x) =>
+    x.eq('status', 'applied').is('followed_up_at', null).lte('applied_at', nudgeCutoff)
+  );
+
   const { data: lastRun } = await db
     .from('scan_runs').select('finished_at')
     .not('finished_at', 'is', null)
@@ -100,6 +106,19 @@ export default async function Home({ searchParams }: { searchParams: { view?: st
           <Tab href="/?view=saved" active={view === 'saved'}>משרות שאהבתי ({savedCount})</Tab>
           <Tab href="/?view=applied" active={view === 'applied'}>הוגשו ({appliedCount})</Tab>
         </nav>
+
+        {view === 'applied' && needFollowUp > 0 && (
+          <div className="mt-5 rounded-2xl border border-amber/35 bg-amber-soft p-4 text-sm">
+            <span className="font-semibold text-amber">
+              {needFollowUp === 1
+                ? 'משרה אחת הוגשה לפני חמישה ימים או יותר ועדיין לא נשלחה אליה פנייה.'
+                : `${needFollowUp} משרות הוגשו לפני חמישה ימים או יותר ועדיין לא נשלחה אליהן פנייה.`}
+            </span>
+            <span className="mt-1 block text-xs text-body">
+              פתיחת המשרה מציגה נוסח פנייה מוכן לשליחה.
+            </span>
+          </div>
+        )}
 
         {listJobs.length === 0 ? (
           <EmptyState view={view} total={total} pending={pending} resumeCount={resumeCount} hasNext={!!nextJob} />

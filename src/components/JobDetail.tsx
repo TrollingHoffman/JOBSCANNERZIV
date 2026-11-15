@@ -5,6 +5,8 @@ import { MatchMeter } from './MatchMeter';
 import { TailorPanel } from './TailorPanel';
 import { CompareVersions } from './CompareVersions';
 import { AgentBrief } from './AgentBrief';
+import { InterviewPrep } from './InterviewPrep';
+import { FollowUp } from './FollowUp';
 import { Logo } from './Logo';
 import { sourceLabel } from '@/lib/sources';
 import { useJobStatus } from '@/lib/useJobStatus';
@@ -180,6 +182,15 @@ export function JobDetail({
               {applied ? 'סומן כהוגשה' : 'סמן כהוגשה'}
             </button>
           </div>
+
+          {/* אחרי הגשה המסך משנה תפקיד: מכאן והלאה השאלה היא הראיון והמעקב,
+              ולא האם להגיש. לכן אלה מופיעים רק עכשיו ולא קודם. */}
+          {applied && (
+            <div className="space-y-4 border-t border-line pt-5">
+              <FollowUp job={job} />
+              <InterviewPrep jobId={job.id} jobTitle={job.title} />
+            </div>
+          )}
         </div>
       </div>
     </div>

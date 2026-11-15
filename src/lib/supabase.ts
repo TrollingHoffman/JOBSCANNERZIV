@@ -22,6 +22,7 @@ export type Job = {
   score_reasons: { strengths: string[]; gaps: string[] } | null;
   status: 'new' | 'saved' | 'applied' | 'hidden'; saved_at: string | null; notified: boolean;
   source: 'drushim' | 'linkedin' | 'manual';
+  applied_at: string | null; followed_up_at: string | null;
 };
 
 /** ספירה מדויקת בצד השרת, לא חישוב על מערך חלקי בזיכרון */
