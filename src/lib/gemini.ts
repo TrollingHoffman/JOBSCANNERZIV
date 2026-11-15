@@ -12,7 +12,9 @@ let cache: { at: number; models: string[] } | null = null;
 
 export async function listModels(): Promise<{ ok: boolean; models?: string[]; status?: number; error?: string }> {
   try {
-    const res = await fetch(`${BASE}/models?key=${encodeURIComponent(apiKey())}&pageSize=200`, { cache: 'no-store' });
+    const res = await fetch(`${BASE}/models?key=${encodeURIComponent(apiKey())}&pageSize=200`, {
+      cache: 'no-store', signal: AbortSignal.timeout(20000),
+    });
     const text = await res.text();
     if (!res.ok) return { ok: false, status: res.status, error: text.slice(0, 300) };
     const models: string[] = (JSON.parse(text).models ?? [])
@@ -60,9 +62,22 @@ async function callModel(model: string, prompt: string, system?: string): Promis
   };
   if (system) body.systemInstruction = { parts: [{ text: system }] };
 
-  const res = await fetch(`${BASE}/models/${model}:generateContent?key=${encodeURIComponent(apiKey())}`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), cache: 'no-store',
-  });
+  // תקרת זמן לקריאה בודדת. בלעדיה קריאה שנתקעת מבזבזת את כל תקציב
+  // הזמן של הפונקציה, ואז אף משרה לא מנותחת.
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 45000);
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}/models/${model}:generateContent?key=${encodeURIComponent(apiKey())}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+      cache: 'no-store', signal: ctrl.signal,
+    });
+  } catch (e: any) {
+    if (e?.name === 'AbortError') throw new Error(`${model} לא ענה תוך 45 שניות`);
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
 
   const text = await res.text();
   if (!res.ok) {

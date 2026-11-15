@@ -9,10 +9,30 @@ export type JobDetail = {
   description: string | null; requirements: string | null; logoUrl: string | null; postedAt: string | null;
 };
 
-async function fetchHtml(url: string): Promise<string> {
-  const res = await fetch(url, { headers: { 'User-Agent': UA, 'Accept-Language': 'he-IL,he;q=0.9', Accept: 'text/html,application/xhtml+xml' }, cache: 'no-store' });
-  if (!res.ok) throw new Error(`drushim החזיר ${res.status}`);
-  return res.text();
+/**
+ * בקשה בודדת לדרושים, עם תקרת זמן.
+ *
+ * בלי התקרה הזו בקשה אחת שנתקעת מפילה את כל הסריקה: הפונקציה ב-Vercel
+ * נהרגת אחרי 300 שניות, ושום משרה לא נשמרת. עדיף לוותר על עמוד אחד
+ * ולהמשיך, מאשר לאבד את הסריקה כולה.
+ */
+async function fetchHtml(url: string, timeoutMs = 15000): Promise<string> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, {
+      headers: { 'User-Agent': UA, 'Accept-Language': 'he-IL,he;q=0.9', Accept: 'text/html,application/xhtml+xml' },
+      cache: 'no-store',
+      signal: ctrl.signal,
+    });
+    if (!res.ok) throw new Error(`drushim החזיר ${res.status}`);
+    return await res.text();
+  } catch (e: any) {
+    if (e?.name === 'AbortError') throw new Error(`דרושים לא ענה תוך ${Math.round(timeoutMs / 1000)} שניות`);
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 export function extractJobRefs(html: string): JobRef[] {
