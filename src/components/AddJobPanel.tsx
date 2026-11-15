@@ -51,14 +51,19 @@ export function AddJobPanel() {
         return;
       }
 
-      if (j.duplicate) {
-        notify('info', 'המשרה הזו כבר במאגר', j.title);
+      if (j.added === 0 && j.duplicates > 0) {
+        notify('info', j.duplicates === 1 ? 'המשרה כבר במאגר' : `כל ${j.duplicates} המשרות כבר במאגר`, 'לא נוספה אף משרה חדשה.');
       } else if (j.needsResume) {
-        notify('success', 'המשרה נוספה', 'בלי קורות חיים ראשיים אין לה ציון התאמה.');
-      } else if (j.analyzed) {
-        notify('success', `המשרה נוספה עם ציון ${j.score}`, j.title);
+        notify('success', `נוספו ${j.added} משרות`, 'בלי קורות חיים ראשיים אין להן ציון התאמה.');
       } else {
-        notify('success', 'המשרה נוספה', 'הניתוח ירוץ בהרצת הניתוח הבאה.');
+        const best = (j.jobs ?? []).filter((x: any) => x.score !== null).sort((a: any, b: any) => b.score - a.score)[0];
+        const headline = j.added === 1 ? 'נוספה משרה אחת' : `נוספו ${j.added} משרות`;
+        const detail = [
+          best ? `הגבוהה ביותר: ${best.title} עם ציון ${best.score}` : null,
+          j.pending > 0 ? `${j.pending} עדיין בתור לניתוח` : null,
+          j.duplicates > 0 ? `${j.duplicates} כבר היו במאגר` : null,
+        ].filter(Boolean).join(' · ');
+        notify('success', headline, detail || undefined);
       }
 
       setUrl(''); setText(''); setShowText(false); setOpen(false);
@@ -94,9 +99,10 @@ export function AddJobPanel() {
         className="sheet my-auto w-full max-w-lg rounded-3xl border border-line bg-surface p-6 shadow-modal"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="font-display text-xl font-bold text-ink">הוספת משרה מלינקדאין</h2>
+        <h2 className="font-display text-xl font-bold text-ink">הוספת משרות מלינקדאין</h2>
         <p className="mt-2 text-sm leading-relaxed text-body">
-          אפשר להדביק כתובת של משרה, או את הטקסט שלה. המשרה תנותח ותדורג מול קורות החיים
+          אפשר להדביק כתובת של משרה בודדת, או <strong>התראת מייל שלמה של לינקדאין</strong>,
+          וכל המשרות שבה ייקלטו בבת אחת. כל משרה מנותחת ומדורגת מול קורות החיים
           בדיוק כמו משרה מדרושים.
         </p>
 
@@ -117,22 +123,23 @@ export function AddJobPanel() {
             onClick={() => setShowText(true)}
             className="mt-3 text-sm font-bold text-accent-ink underline"
           >
-            המשרה בפוסט, או בלי עמוד משרה? להדביק טקסט
+            להדביק טקסט או התראת מייל שלמה
           </button>
         ) : (
           <>
             <label htmlFor="add-text" className="mt-4 block text-sm font-bold text-ink">
-              טקסט המשרה
+              טקסט המשרות
             </label>
             <p className="mt-1 text-xs text-muted">
-              אפשר להדביק פוסט מלינקדאין, התראת מייל, או את תוכן עמוד המשרה.
+              התראת מייל של לינקדאין מכילה בדרך כלל שמונה עד עשר משרות, וכולן ייקלטו מהדבקה אחת.
+              אפשר גם להדביק פוסט בודד או תוכן של עמוד משרה.
             </p>
             <textarea
               id="add-text"
               value={text}
               onChange={(e) => setText(e.target.value)}
-              rows={8}
-              placeholder="להדביק כאן את תוכן המשרה..."
+              rows={10}
+              placeholder="להדביק כאן..."
               className="mt-1.5 w-full resize-y rounded-xl border border-line bg-paper px-3 py-2.5 text-sm text-ink placeholder:text-muted"
             />
           </>
@@ -144,7 +151,7 @@ export function AddJobPanel() {
             disabled={busy}
             className="rounded-xl bg-accent px-5 py-2.5 text-sm font-bold text-white transition hover:bg-accent-ink disabled:opacity-60"
           >
-            {busy ? 'מנתח את המשרה...' : 'להוסיף ולנתח'}
+            {busy ? 'מנתח...' : 'להוסיף ולנתח'}
           </button>
           <button
             onClick={() => setOpen(false)}
