@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     results.sort((a, b) => b.score - a.score);
     const best = results[0];
     const gap = best.score - (results[results.length - 1]?.score ?? 0);
-    const verdict = gap <= 3 ? `הגרסאות קרובות מאוד (פער ${gap}).` : `עדיף לשלוח את "${best.label}" — פער ${gap} נקודות.`;
+    const verdict = gap <= 3 ? `הגרסאות קרובות מאוד (פער ${gap}).` : `עדיף לשלוח את "${best.label}", פער ${gap} נקודות.`;
 
     await db.from('comparisons').upsert({ job_id: jobId, results, verdict }, { onConflict: 'job_id' });
     return NextResponse.json({ job_id: jobId, results, verdict });

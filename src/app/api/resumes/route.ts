@@ -21,7 +21,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: true, message: 'הגרסה הוגדרה כראשית' });
       }
 
-      /** ריקון הסלוט הראשי — נשארים בלי גרסה ראשית */
+      /** ריקון הסלוט הראשי, נשארים בלי גרסה ראשית */
       if (body.action === 'clear-primary') {
         const { error } = await db.from('resumes').update({ is_primary: false }).eq('is_primary', true);
         if (error) throw new Error(error.message);

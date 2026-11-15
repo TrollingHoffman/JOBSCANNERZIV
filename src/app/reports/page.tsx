@@ -54,7 +54,7 @@ export default async function ReportsPage() {
           <h2 className="mb-2 font-display text-lg font-bold text-danger">שגיאות אחרונות</h2>
           <ul className="space-y-1 text-sm text-body">
             {list.filter((r: any) => r.error).slice(0, 5).map((r: any) => (
-              <li key={r.id}><span className="font-bold">{new Date(r.started_at).toLocaleString('he-IL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span> — {r.error}</li>
+              <li key={r.id}><span className="font-bold">{new Date(r.started_at).toLocaleString('he-IL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>: {r.error}</li>
             ))}
           </ul>
         </div>

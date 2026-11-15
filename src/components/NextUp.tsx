@@ -135,7 +135,7 @@ function Row({ label, value }: { label: string; value: number | null }) {
   return (
     <div className="flex items-baseline justify-between gap-3 border-b border-line pb-2">
       <dt className="text-muted">{label}</dt>
-      <dd className="font-display text-base font-bold text-ink">{value ?? '—'}</dd>
+      <dd className="font-display text-base font-bold text-ink">{value ?? 'לא חושב'}</dd>
     </div>
   );
 }

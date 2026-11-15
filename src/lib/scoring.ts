@@ -13,7 +13,7 @@ type JobLike = {
 };
 
 const SYSTEM = `את/ה מנתח/ת התאמה בין קורות חיים למשרות בשוק העבודה הישראלי.
-כל הפלט בעברית תקנית, בלי סופרלטיבים. אל תמציא מידע. מחזיר/ה JSON בלבד.`;
+כל הפלט בעברית תקנית, בלי סופרלטיבים. אל תמציא מידע. אסור להשתמש בתו מקף ארוך. מחזיר/ה JSON בלבד.`;
 
 export function ratingFor(score: number): string {
   if (score >= 80) return 'התאמה מצוינת';
@@ -96,7 +96,7 @@ export type TailoringResult = {
 
 export async function tailorResume(job: JobLike, cvText: string): Promise<TailoringResult> {
   const out = await askJson<TailoringResult>(
-    `## המשרה\n${job.title}${job.company ? ` — ${job.company}` : ''}\n\nתיאור:\n${job.description ?? ''}\n\nדרישות:\n${job.requirements ?? ''}\n\nמונחי מפתח: ${(job.buzzwords ?? []).join(', ')}\n\n## קורות החיים\n${cvText.slice(0, 12000)}\n\n## המשימה\nאין להמציא ניסיון או מספרים. מותר לנסח מחדש ולחדד. כל שינוי מוכן להעתקה.\n\nJSON:\n{ "headline": "", "summary": "", "edits": [{ "section": "", "current": "", "suggested": "", "why": "" }], "add_keywords": [""], "gaps": [""], "cover_letter": "" }\n\n3 עד 6 עריכות.`,
+    `## המשרה\n${job.title}${job.company ? `, ${job.company}` : ''}\n\nתיאור:\n${job.description ?? ''}\n\nדרישות:\n${job.requirements ?? ''}\n\nמונחי מפתח: ${(job.buzzwords ?? []).join(', ')}\n\n## קורות החיים\n${cvText.slice(0, 12000)}\n\n## המשימה\nאין להמציא ניסיון או מספרים. מותר לנסח מחדש ולחדד. כל שינוי מוכן להעתקה.\n\nJSON:\n{ "headline": "", "summary": "", "edits": [{ "section": "", "current": "", "suggested": "", "why": "" }], "add_keywords": [""], "gaps": [""], "cover_letter": "" }\n\n3 עד 6 עריכות.`,
     SYSTEM
   );
   return {

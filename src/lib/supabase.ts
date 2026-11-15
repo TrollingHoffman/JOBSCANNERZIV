@@ -24,7 +24,7 @@ export type Job = {
   source: 'drushim' | 'linkedin' | 'manual';
 };
 
-/** ספירה מדויקת בצד השרת — לא חישוב על מערך חלקי בזיכרון */
+/** ספירה מדויקת בצד השרת, לא חישוב על מערך חלקי בזיכרון */
 export async function jobCount(filter?: (q: any) => any): Promise<number> {
   let q: any = db.from('jobs').select('*', { count: 'exact', head: true });
   if (filter) q = filter(q);
