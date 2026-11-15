@@ -18,7 +18,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, followedUp });
     }
 
-    if (!['new', 'saved', 'applied', 'hidden'].includes(status)) {
+    if (!['new', 'saved', 'applied', 'hidden', 'dismissed'].includes(status)) {
       return NextResponse.json({ error: 'בקשה לא תקינה' }, { status: 400 });
     }
 
@@ -26,6 +26,9 @@ export async function POST(req: Request) {
       status,
       saved_at: status === 'saved' ? new Date().toISOString() : null,
     };
+    // "לא בשבילי" הוא החלטה של זיו, ולכן נשמר מתי. זה שונה ממשרה
+    // שהוסתרה בגלל ייבוא שגוי.
+    if (status === 'dismissed') patch.dismissed_at = new Date().toISOString();
     // ביטול סימון ההגשה מנקה גם את המעקב, אחרת נשאר מעקב אחרי משרה שלא הוגשה
     if (status !== 'applied') patch.followed_up_at = null;
 

@@ -37,7 +37,7 @@ async function run(body: any) {
     }
 
     // משרה מוסתרת לא תוצג לזיו, ולכן אין סיבה לשרוף עליה מכסת ניתוח
-    let q: any = db.from('jobs').select('*').neq('status', 'hidden');
+    let q: any = db.from('jobs').select('*').in('status', ['new', 'saved', 'applied']);
     if (!body.redoAll) q = q.is('score', null);
     const { data: jobs } = await q.limit(60);
 

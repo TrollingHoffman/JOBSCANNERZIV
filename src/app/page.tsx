@@ -25,8 +25,9 @@ export default async function Home({ searchParams }: { searchParams: { view?: st
   const sort = searchParams.sort ?? 'score';
   const freshCutoff = new Date(Date.now() - FRESH_HOURS * 3600000).toISOString();
 
-  // מוסתרות לא מופיעות בשום תצוגה ולא נספרות בשום מונה
-  let q: any = db.from('jobs').select('*').neq('status', 'hidden');
+  // מוסתרות ומה שזיו פסלה לא מופיעות בשום תצוגה ולא נספרות
+  const LIVE = ['new', 'saved', 'applied'];
+  let q: any = db.from('jobs').select('*').in('status', LIVE);
   if (view === 'saved') q = q.eq('status', 'saved');
   if (view === 'applied') q = q.eq('status', 'applied');
   if (view === 'fresh') q = q.gte('first_seen_at', freshCutoff);
@@ -38,7 +39,7 @@ export default async function Home({ searchParams }: { searchParams: { view?: st
   const { data } = await q.limit(300);
   const jobs = (data ?? []) as Job[];
 
-  const visible = (x: any) => x.neq('status', 'hidden');
+  const visible = (x: any) => x.in('status', LIVE);
   const [total, strong, savedCount, appliedCount, pending, freshCount, resumeCount] = await Promise.all([
     jobCount(visible),
     jobCount((x) => visible(x).gte('score', THRESHOLD)),
@@ -48,6 +49,9 @@ export default async function Home({ searchParams }: { searchParams: { view?: st
     jobCount((x) => visible(x).gte('first_seen_at', freshCutoff)),
     db.from('resumes').select('*', { count: 'exact', head: true }).then((r) => r.count ?? 0),
   ]);
+
+  // מה שבאמת נשאר לעבור עליו: לא סך הכל, ולא מה שכבר טופל
+  const untouchedStrong = await jobCount((x) => x.eq('status', 'new').gte('score', THRESHOLD));
 
   const nudgeCutoff = new Date(Date.now() - FOLLOW_UP_DAYS * 86400000).toISOString();
   const needFollowUp = await jobCount((x) =>
@@ -80,6 +84,14 @@ export default async function Home({ searchParams }: { searchParams: { view?: st
                 : 'עוד לא בוצעה סריקה'}
             </p>
             <nav className="enter enter-fade flex flex-wrap items-center gap-2" style={{ ["--enter-delay" as string]: "60ms" }} aria-label="פעולות">
+              {untouchedStrong > 0 && (
+                <Link
+                  href="/review"
+                  className="rounded-xl bg-accent px-4 py-2 text-sm font-bold text-white transition hover:bg-accent-ink"
+                >
+                  לעבור על המשרות ({untouchedStrong})
+                </Link>
+              )}
               <AddJobPanel />
               <ScanButton pending={pending} />
               <Link href="/reports" className="rounded-xl border border-white/20 px-3.5 py-2 text-sm font-bold text-white/85 transition hover:border-white/50 hover:text-white">דוחות</Link>
@@ -91,11 +103,11 @@ export default async function Home({ searchParams }: { searchParams: { view?: st
             <span className="word"><span style={{ animationDelay: '60ms' }}>{greeting()}</span></span>
             <span className="word">
               <span style={{ animationDelay: '200ms' }} className="text-signal">
-                {freshCount > 0
-                  ? `${freshCount} ${freshCount === 1 ? 'משרה חדשה נכנסה' : 'משרות חדשות נכנסו'} בשעות האחרונות.`
-                  : strong > 0
-                    ? `${strong} משרות מחכות לך.`
-                    : 'נתחיל מכאן.'}
+                {untouchedStrong > 0
+                  ? `${untouchedStrong} ${untouchedStrong === 1 ? 'משרה מחכה' : 'משרות מחכות'} שתעברי עליהן.`
+                  : freshCount > 0
+                    ? `${freshCount} ${freshCount === 1 ? 'משרה חדשה נכנסה' : 'משרות חדשות נכנסו'} בשעות האחרונות.`
+                    : 'עברת על הכל. יפה.'}
               </span>
             </span>
           </h1>

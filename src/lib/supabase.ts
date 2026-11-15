@@ -39,7 +39,8 @@ export type Job = {
   score: number | null; ats_score: number | null; hr_score: number | null; rating: string | null;
   summary: string | null; responsibilities: string[]; key_requirements: string[]; buzzwords: string[];
   score_reasons: { strengths: string[]; gaps: string[] } | null;
-  status: 'new' | 'saved' | 'applied' | 'hidden'; saved_at: string | null; notified: boolean;
+  status: 'new' | 'saved' | 'applied' | 'hidden' | 'dismissed';
+  saved_at: string | null; dismissed_at: string | null; notified: boolean;
   source: 'drushim' | 'linkedin' | 'manual' | 'alljobs' | 'jobmaster' | 'generic';
   recruiter: string | null;
   applied_at: string | null; followed_up_at: string | null;
