@@ -101,6 +101,13 @@ export async function askJson<T>(prompt: string, system?: string): Promise<T> {
     try { raw = await callModel(model, prompt, system); ok = true; break; }
     catch (e: any) {
       attempts.push(`${model} → ${e?.status ?? ''} ${String(e?.message ?? e).slice(0, 80)}`);
+
+      // 429 היא מכסה ברמת הפרויקט ולא ברמת המודל: כל המודלים חולקים אותה.
+      // מעבר למודל הבא רק ישרוף עוד קריאה מאותה מכסה, פי שישה בכל משרה,
+      // ויחמיר בדיוק את מה שניסינו לעקוף. עוצרים מיד.
+      if (e?.status === 429) {
+        throw new Error('המכסה של Gemini נגמרה. המכסה היומית מתאפסת, והניתוח המתוזמן ימשיך מעצמו כשהיא תתאפס.');
+      }
       if (e?.status === 400 || e?.status === 401 || e?.status === 403) break;
     }
   }
