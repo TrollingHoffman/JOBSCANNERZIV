@@ -72,12 +72,12 @@ export default async function Home({ searchParams }: { searchParams: { view?: st
       <header className="bg-night text-white">
         <div className="mx-auto max-w-6xl px-4 pb-8 pt-6 sm:px-6 sm:pb-10 sm:pt-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-xs text-white/50">
+            <p className="enter enter-fade text-xs text-white/50">
               {lastRun?.finished_at
                 ? `נסרק לאחרונה ${new Date(lastRun.finished_at).toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}`
                 : 'עוד לא בוצעה סריקה'}
             </p>
-            <nav className="flex flex-wrap items-center gap-2" aria-label="פעולות">
+            <nav className="enter enter-fade flex flex-wrap items-center gap-2" style={{ ["--enter-delay" as string]: "60ms" }} aria-label="פעולות">
               <AddJobPanel />
               <ScanButton pending={pending} />
               <Link href="/reports" className="rounded-xl border border-white/20 px-3.5 py-2 text-sm font-bold text-white/85 transition hover:border-white/50 hover:text-white">דוחות</Link>
@@ -98,7 +98,7 @@ export default async function Home({ searchParams }: { searchParams: { view?: st
             </span>
           </h1>
 
-          <div className="mt-8">
+          <div className="enter mt-8" style={{ ["--enter-delay" as string]: "260ms", ["--enter-y" as string]: "10px" }}>
             <Journey scanned={total} passing={strong} loved={savedCount} applied={appliedCount} />
           </div>
         </div>
@@ -147,11 +147,18 @@ export default async function Home({ searchParams }: { searchParams: { view?: st
               {nextJob ? `עוד ${listJobs.length} משרות בתצוגה הזו` : `${listJobs.length} משרות בתצוגה הזו`}
             </p>
             <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {listJobs.map((j, i) => (
-                <Reveal key={j.id} delay={Math.min(i, 5) * 45} className="h-full">
-                  <JobCard job={j} resumeCount={resumeCount} />
-                </Reveal>
-              ))}
+              {listJobs.map((j, i) => {
+                // השהיות מתכווצות ומרחק שיורד: הקבוצה נקראת כגל ולא כתור.
+                // מרווחים שווים הם המקבילה של linear באלמנט בודד.
+                const step = [0, 70, 125, 165, 195, 215];
+                const dist = [26, 22, 18, 16, 14, 14];
+                const k = Math.min(i, step.length - 1);
+                return (
+                  <Reveal key={j.id} delay={step[k]} distance={dist[k]} className="h-full">
+                    <JobCard job={j} resumeCount={resumeCount} />
+                  </Reveal>
+                );
+              })}
             </div>
           </>
         )}

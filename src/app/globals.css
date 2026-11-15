@@ -23,12 +23,29 @@ body { background: #F7F4EF; color: #17171C; -webkit-font-smoothing: antialiased;
    MOTION 2 לפי DESIGN.md: scroll-reveal ומעברי מצב.
    אין לופים אינסופיים (R-19): המרקיז והנקודה הפועמת הוסרו. */
 
-.reveal { opacity: 0; transform: translateY(20px); transition: opacity .55s var(--ease-out), transform .55s var(--ease-out); }
+.reveal { opacity: 0; transform: translateY(var(--reveal-y, 20px)); transition: opacity .55s var(--ease-out), transform .55s var(--ease-out); }
 .reveal.shown { opacity: 1; transform: none; }
 
+/* ---- כוריאוגרפיית הכניסה ----
+   כניסה אחת לכל מיכל, והתפקידים נקבעים לפי חשיבות ולא לפי סדר ב-DOM:
+   lead זז הכי הרבה, support פחות, decoration רק נדלק.
+   ההשהיות מתכווצות ככל שהגל מתקדם, כי מרווחים שווים נקראים כמו מטרונום.
+   מקור: emil choreograph (MIT). */
+
 .word { display: block; overflow: hidden; }
-.word > span { display: block; transform: translateY(105%); animation: word-up .9s cubic-bezier(.16,.84,.24,1) both; }
+.word > span { display: block; transform: translateY(105%); animation: word-up .75s var(--ease-out) both; }
 @keyframes word-up { to { transform: none; } }
+
+@keyframes enter-up {
+  from { opacity: 0; transform: translateY(var(--enter-y, 14px)); }
+  to   { opacity: 1; transform: none; }
+}
+.enter {
+  opacity: 0;
+  animation: enter-up var(--enter-dur, .6s) var(--ease-out) var(--enter-delay, 0ms) forwards;
+}
+/* decoration: נדלק במקום, בלי תנועה */
+.enter-fade { --enter-y: 0px; --enter-dur: .5s; }
 
 /* מד ההתאמה: המוטיב של המוצר. הפס נמשך פעם אחת ועוצר,
    כי הוא מודד מרחק מהסף ולא מנפיש לשם ההנפשה. */
@@ -94,6 +111,7 @@ body { background: #F7F4EF; color: #17171C; -webkit-font-smoothing: antialiased;
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
   .word > span, .pop, .fade, .panel-open, .overlay, .sheet, .toast-in, .toast-out { animation: none !important; transform: none !important; }
+  .enter { opacity: 1; animation: none !important; transform: none !important; }
   .meter-animate .meter-bar { animation: none; transform: scaleX(var(--fill)); }
   .score-ring circle.value { animation: none; stroke-dashoffset: var(--offset); }
   .card-hover:hover { transform: none; }

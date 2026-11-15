@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-export function Reveal({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) {
+export function Reveal({ children, delay = 0, distance, className = '' }: { children: React.ReactNode; delay?: number; distance?: number; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const [shown, setShown] = useState(false);
   useEffect(() => {
@@ -12,7 +12,15 @@ export function Reveal({ children, delay = 0, className = '' }: { children: Reac
     io.observe(el);
     return () => io.disconnect();
   }, []);
-  return <div ref={ref} className={`reveal ${shown ? 'shown' : ''} ${className}`} style={{ transitionDelay: `${delay}ms` }}>{children}</div>;
+  return (
+    <div
+      ref={ref}
+      className={`reveal ${shown ? 'shown' : ''} ${className}`}
+      style={{ transitionDelay: `${delay}ms`, ...(distance ? { ['--reveal-y' as string]: `${distance}px` } : {}) }}
+    >
+      {children}
+    </div>
+  );
 }
 
 export function CountUp({ to, duration = 1100 }: { to: number; duration?: number }) {

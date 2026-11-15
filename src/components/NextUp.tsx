@@ -25,14 +25,17 @@ export function NextUp({ job, resumeCount = 0 }: { job: Job; resumeCount?: numbe
   return (
     <>
       <section className="mt-8" aria-labelledby="nextup-heading">
-        <div className="flex items-baseline justify-between gap-4">
+        <div className="enter enter-fade flex items-baseline justify-between gap-4" style={{ ["--enter-delay" as string]: "330ms" }}>
           <h2 id="nextup-heading" className="font-display text-sm font-bold text-accent-ink">
             {strong ? 'המשרה להגיש אליה עכשיו' : 'ההתאמה הטובה ביותר שנותרה'}
           </h2>
           {a.fresh && <span className="text-xs font-bold text-flame">נקלטה בשלוש השעות האחרונות</span>}
         </div>
 
-        <div className="mt-3 overflow-hidden rounded-4xl border border-accent/25 bg-surface shadow-hero">
+        <div
+          className="enter mt-3 overflow-hidden rounded-4xl border border-accent/25 bg-surface shadow-hero"
+          style={{ ["--enter-delay" as string]: "380ms", ["--enter-y" as string]: "18px" }}
+        >
           <div className="grid gap-0 md:grid-cols-[1.6fr_1fr]">
             {/* הצד שמסביר למה דווקא היא */}
             <div className="p-6 sm:p-8">

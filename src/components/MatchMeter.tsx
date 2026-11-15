@@ -24,6 +24,7 @@ export function MatchMeter({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [shown, setShown] = useState(false);
+  const [display, setDisplay] = useState<number | null>(null);
 
   useEffect(() => {
     const el = ref.current;
@@ -36,6 +37,32 @@ export function MatchMeter({
     io.observe(el);
     return () => io.disconnect();
   }, []);
+
+  /**
+   * המספר נוחת יחד עם הפס, ולא רץ בזמן משלו.
+   * תנועה משנית מתחברת לרגע של התנועה הראשית, אחרת נוצרות שתי הנפשות
+   * שבמקרה קורות באותו זמן. אותה משך ואותה עקומה כמו meter-fill.
+   */
+  useEffect(() => {
+    if (!shown || score === null || score === undefined) return;
+    const target = Math.max(0, Math.min(100, score));
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setDisplay(target);
+      return;
+    }
+    const DUR = 900, DELAY = 100;
+    let raf = 0;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min(1, Math.max(0, (now - start - DELAY) / DUR));
+      // cubic-bezier(0.23, 1, 0.32, 1) מקורב, כדי שהספירה והפס יאטו יחד
+      const eased = 1 - Math.pow(1 - t, 3);
+      setDisplay(Math.round(target * eased));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [shown, score]);
 
   // ציון חסר הוא מצב בפני עצמו, לא אפס (unknown ≠ zero)
   if (score === null || score === undefined) {
@@ -68,8 +95,11 @@ export function MatchMeter({
           />
         </div>
         {showNumber && (
-          <span className={`shrink-0 font-display font-bold leading-none ${num} ${strong ? 'text-good' : 'text-muted'}`}>
-            {clamped}
+          <span
+            className={`shrink-0 font-display font-bold leading-none tabular-nums ${num} ${strong ? 'text-good' : 'text-muted'}`}
+            aria-label={`ציון התאמה ${clamped} מתוך 100`}
+          >
+            {display ?? clamped}
           </span>
         )}
       </div>
