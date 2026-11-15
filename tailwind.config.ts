@@ -49,7 +49,8 @@ export default {
         lift: '0 4px 10px rgba(28,25,23,.05), 0 26px 48px -28px rgba(28,25,23,.45)',
         modal: '0 40px 80px -30px rgba(28,25,23,.5)',
         toast: '0 18px 40px -18px rgba(28,25,23,.45)',
-        hero: '0 2px 4px rgba(28,25,23,.05), 0 40px 70px -40px rgba(194,65,12,.45)',
+        // הצללה אחת בלבד בכל הדף, על ההמלצה הראשית, כסימן היררכיה ולא כזוהר (R-12, R-13)
+        hero: '0 2px 4px rgba(28,25,23,.05), 0 28px 50px -34px rgba(28,25,23,.45)',
       },
       borderRadius: { '2xl': '1.25rem', '3xl': '1.75rem', '4xl': '2.25rem' },
     },

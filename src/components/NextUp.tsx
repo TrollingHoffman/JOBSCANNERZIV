@@ -39,7 +39,7 @@ export function NextUp({ job, resumeCount = 0 }: { job: Job; resumeCount?: numbe
                 <Logo job={job} large />
                 <div className="min-w-0">
                   <h3 className="font-display text-2xl font-bold leading-tight text-ink sm:text-3xl">
-                    <button onClick={() => setOpen(true)} className="text-right transition hover:text-accent-ink">
+                    <button onClick={() => setOpen(true)} className="-my-1 py-1 text-right transition hover:text-accent-ink">
                       {job.title}
                     </button>
                   </h3>

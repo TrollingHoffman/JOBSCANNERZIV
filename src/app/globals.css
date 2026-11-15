@@ -47,6 +47,12 @@ body { background: #F7F4EF; color: #17171C; -webkit-font-smoothing: antialiased;
 .card-hover { transition: transform .25s cubic-bezier(.2,.7,.3,1), box-shadow .25s ease, border-color .25s ease; }
 .card-hover:hover { transform: translateY(-4px); }
 
+/* R-03: שטח הנגיעה של "פתיחת המשרה" הוא כל הכרטיס, ולא שורת הכותרת בלבד.
+   נשאר כפתור אחד אמיתי, כך שגם המקלדת וגם קורא מסך מקבלים שם אחד נכון. */
+.card-link::after { content: ''; position: absolute; inset: 0; z-index: 1; }
+/* כל כפתור אייקון עומד במינימום של 44 פיקסל, גם כשהאייקון קטן. */
+.tap { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+
 /* הכרטיס מגלה את הבאזוורדים בריחוף. מידע שנחשף בכוונה, לא קישוט. */
 .peek { max-height: 0; opacity: 0; overflow: hidden; transition: max-height .3s cubic-bezier(.2,.7,.3,1), opacity .25s ease, margin-top .3s ease; }
 .card-hover:hover .peek, .card-hover:focus-within .peek { max-height: 5rem; opacity: 1; margin-top: .75rem; }

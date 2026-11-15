@@ -26,7 +26,7 @@ export function JobCard({ job, resumeCount = 0 }: { job: Job; resumeCount?: numb
       {/* R-39: הכרטיס הוא כפתור אמיתי ולא div שאפשר ללחוץ עליו,
           כך שהוא נגיש במקלדת ומכריז על עצמו נכון. */}
       <article
-        className={`card-hover flex h-full flex-col rounded-3xl border bg-surface p-5 shadow-card focus-within:shadow-lift hover:shadow-lift ${
+        className={`card-hover relative flex h-full flex-col rounded-3xl border bg-surface p-5 shadow-card focus-within:shadow-lift hover:shadow-lift ${
           a.fresh ? 'border-flame/35 hover:border-flame' : 'border-line hover:border-ink/25'
         }`}
       >
@@ -37,7 +37,7 @@ export function JobCard({ job, resumeCount = 0 }: { job: Job; resumeCount?: numb
             disabled={busy}
             aria-pressed={saved}
             aria-label={saved ? `הסרת ${job.title} מהמשרות שאהבתי` : `שמירת ${job.title} למשרות שאהבתי`}
-            className={`rounded-full p-2 transition disabled:opacity-50 ${
+            className={`tap relative z-10 rounded-full transition disabled:opacity-50 ${
               saved ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-paper hover:text-accent'
             } ${justSaved ? 'pop' : ''}`}
           >
@@ -60,7 +60,7 @@ export function JobCard({ job, resumeCount = 0 }: { job: Job; resumeCount?: numb
         </div>
 
         <h3 className="mt-2 font-display text-base font-bold leading-snug text-ink">
-          <button onClick={() => setOpen(true)} className="clamp-2 text-right transition hover:text-accent-ink">
+          <button onClick={() => setOpen(true)} className="card-link clamp-2 text-right transition hover:text-accent-ink">
             {job.title}
           </button>
         </h3>
@@ -78,7 +78,7 @@ export function JobCard({ job, resumeCount = 0 }: { job: Job; resumeCount?: numb
 
         {/* הבאזוורדים נחשפים בריחוף או בפוקוס. מידע, לא קישוט, ולכן הם לא רצים בלופ. */}
         {job.buzzwords?.length > 0 && (
-          <div className="peek">
+          <div className="peek relative z-10">
             <div className="flex flex-wrap gap-1">
               {job.buzzwords.slice(0, 6).map((b) => (
                 <span key={b} className="rounded-full bg-accent-soft px-2 py-0.5 text-[11px] font-semibold text-accent-ink">{b}</span>
