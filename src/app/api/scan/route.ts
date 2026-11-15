@@ -58,7 +58,7 @@ async function runScan() {
         external_id: detail.externalId, url: detail.url, title: detail.title,
         company: detail.company, location: detail.location, scope: detail.scope,
         experience: detail.experience, description: detail.description, requirements: detail.requirements,
-        logo_url: detail.logoUrl, posted_at: detail.postedAt ?? today,
+        logo_url: detail.logoUrl, posted_at: detail.postedAt ?? today, source: 'drushim',
       };
 
       if (resume?.content) {

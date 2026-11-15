@@ -21,6 +21,7 @@ export type Job = {
   summary: string | null; responsibilities: string[]; key_requirements: string[]; buzzwords: string[];
   score_reasons: { strengths: string[]; gaps: string[] } | null;
   status: 'new' | 'saved' | 'applied' | 'hidden'; saved_at: string | null; notified: boolean;
+  source: 'drushim' | 'linkedin' | 'manual';
 };
 
 /** ספירה מדויקת בצד השרת — לא חישוב על מערך חלקי בזיכרון */

@@ -31,22 +31,3 @@ export function CountUp({ to, duration = 1100 }: { to: number; duration?: number
   }, [to, duration]);
   return <>{value}</>;
 }
-
-export function Marquee({ items }: { items: { term: string; count: number }[] }) {
-  if (!items.length) return null;
-  const doubled = [...items, ...items];
-  return (
-    <div className="marquee relative overflow-hidden" dir="ltr">
-      <div className="marquee-track gap-2.5">
-        {doubled.map((it, i) => (
-          <span key={`${it.term}-${i}`} className="flex items-center gap-2 whitespace-nowrap rounded-full border border-white/12 bg-white/[.06] px-4 py-2 text-sm text-white/85">
-            <span className="font-semibold">{it.term}</span>
-            <span className="rounded-full bg-signal/20 px-1.5 text-xs font-bold text-signal">{it.count}</span>
-          </span>
-        ))}
-      </div>
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-night to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-night to-transparent" />
-    </div>
-  );
-}
