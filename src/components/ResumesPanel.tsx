@@ -126,8 +126,12 @@ export function ResumesPanel({ resumes }: { resumes: Resume[] }) {
             ) : (
               <button onClick={() => extraInput.current?.click()} className="flex w-full flex-col items-center gap-2 py-8 text-center">
                 <PlusIcon />
-                <span className="font-bold text-accent">אין גרסה ראשית</span>
-                <span className="text-xs text-muted">גררו לכאן קובץ או סלוט משני. בלי גרסה ראשית לא יחושבו ציונים.</span>
+                <span className="font-bold text-accent">לא נבחרה גרסה ראשית</span>
+                <span className="text-xs text-muted">
+                  {resumes.length > 0
+                    ? 'הציונים מחושבים בינתיים מול הגרסה הוותיקה ביותר. גררו לכאן גרסה כדי לקבוע מולה את הציונים.'
+                    : 'גררו לכאן קובץ. בלי קורות חיים לא יחושבו ציוני התאמה.'}
+                </span>
               </button>
             )}
           </div>

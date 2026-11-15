@@ -65,7 +65,7 @@ export function SettingsForm({ settings, searches, resumes }: { settings: any; s
           <Input label="קישור מדרושים" value={newSearch.url} onChange={(v) => setNewSearch({ ...newSearch, url: v })} placeholder="https://www.drushim.co.il/jobs/search/..." ltr />
           <label className="block">
             <span className="mb-1 block text-sm font-bold text-ink">עומק סריקה: {newSearch.maxPages} עמודים</span>
-            <input type="range" min={1} max={10} value={newSearch.maxPages} onChange={(e) => setNewSearch({ ...newSearch, maxPages: Number(e.target.value) })} className="w-full accent-[#2F6B58]" />
+            <input type="range" min={1} max={10} value={newSearch.maxPages} onChange={(e) => setNewSearch({ ...newSearch, maxPages: Number(e.target.value) })} className="w-full accent-[#C2410C]" />
           </label>
           <button onClick={() => post({ action: 'add-search', ...newSearch }, 'החיפוש נוסף')} disabled={!newSearch.url} className="rounded-xl bg-night px-5 py-2.5 text-sm font-bold text-white transition hover:bg-accent disabled:opacity-40">הוספת חיפוש</button>
         </div>
@@ -86,12 +86,12 @@ export function SettingsForm({ settings, searches, resumes }: { settings: any; s
           <button onClick={addEmail} className="rounded-xl bg-night px-4 py-2.5 text-sm font-bold text-white transition hover:bg-accent">הוספה</button>
         </div>
         <label className="mt-4 flex items-center gap-2.5 text-sm">
-          <input type="checkbox" checked={sendEmail} onChange={(e) => setSendEmail(e.target.checked)} className="h-4 w-4 accent-[#2F6B58]" />
+          <input type="checkbox" checked={sendEmail} onChange={(e) => setSendEmail(e.target.checked)} className="h-4 w-4 accent-[#C2410C]" />
           שליחת מייל כשנמצאות משרות חדשות
         </label>
         <div className="mt-4">
           <label className="text-sm font-bold text-ink">ציון מינימלי לשליחה: <span className="text-accent">{minScore}</span></label>
-          <input type="range" min={0} max={100} step={5} value={minScore} onChange={(e) => setMinScore(Number(e.target.value))} className="mt-2 w-full accent-[#2F6B58]" />
+          <input type="range" min={0} max={100} step={5} value={minScore} onChange={(e) => setMinScore(Number(e.target.value))} className="mt-2 w-full accent-[#C2410C]" />
         </div>
       </Card>
 
