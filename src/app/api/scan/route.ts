@@ -16,6 +16,14 @@ export async function GET(req: Request) {
 export async function POST() { return runScan(); }
 
 async function runScan() {
+  // סריקה שנקטעה באמצע משאירה שורה פתוחה לנצח, ואז הדוח מציג אותה כרצה.
+  // סוגרים כאן כל שורה שנפתחה לפני יותר מרבע שעה ולא הסתיימה.
+  await db
+    .from('scan_runs')
+    .update({ finished_at: new Date().toISOString(), error: 'הסריקה נקטעה לפני שהסתיימה' })
+    .is('finished_at', null)
+    .lt('started_at', new Date(Date.now() - 15 * 60000).toISOString());
+
   const { data: run } = await db.from('scan_runs').insert({}).select().single();
   const runId = run?.id;
   const stats = { found: 0, new_jobs: 0, reposts: 0, emailed: 0 };
@@ -37,15 +45,30 @@ async function runScan() {
     const known = new Map((existing ?? []).map((j: any) => [j.external_id, j]));
     const newRefs = [...refs.values()].filter((r) => !known.has(r.externalId));
 
+    // סימון "נראתה שוב" בקריאה אחת לכל המשרות המוכרות, במקום קריאה לכל משרה.
+    // רק פרסום חוזר, שהוא נדיר, מטופל בנפרד.
     const now = Date.now();
+    const seenAgain: string[] = [];
+    const reposted: { id: string; dates: string[] }[] = [];
+
     for (const [extId, prev] of known) {
       const gapDays = (now - new Date(prev.last_seen_at).getTime()) / 86400000;
-      const patch: Record<string, any> = { last_seen_at: new Date().toISOString() };
-      if (gapDays >= 4) {
-        const dates: string[] = prev.repost_dates ?? [];
-        if (!dates.includes(today)) { patch.repost_dates = [...dates, today]; stats.reposts++; }
+      const dates: string[] = prev.repost_dates ?? [];
+      if (gapDays >= 4 && !dates.includes(today)) {
+        reposted.push({ id: prev.id, dates: [...dates, today] });
+        stats.reposts++;
+      } else {
+        seenAgain.push(extId);
       }
-      await db.from('jobs').update(patch).eq('external_id', extId);
+    }
+
+    if (seenAgain.length) {
+      await db.from('jobs').update({ last_seen_at: new Date().toISOString() }).in('external_id', seenAgain);
+    }
+    for (const r of reposted) {
+      await db.from('jobs')
+        .update({ last_seen_at: new Date().toISOString(), repost_dates: r.dates })
+        .eq('id', r.id);
     }
 
     const analyzed: any[] = [];
