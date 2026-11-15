@@ -6,7 +6,22 @@ import { ResumesPanel } from './ResumesPanel';
 import { useToast } from './Toast';
 import type { Resume } from '@/lib/supabase';
 
-type Search = { id: string; label: string; url: string; max_pages: number; active: boolean };
+type Search = {
+  id: string; label: string; url: string; max_pages: number; active: boolean;
+  board?: string | null; last_ok_at?: string | null; last_error?: string | null; last_found?: number | null;
+};
+
+const BOARD_LABEL: Record<string, string> = {
+  drushim: 'דרושים', alljobs: 'AllJobs', jobmaster: 'JobMaster', generic: 'לוח אחר',
+};
+
+function boardFromUrl(url: string): string {
+  const u = url.toLowerCase();
+  if (u.includes('alljobs.co.il')) return 'alljobs';
+  if (u.includes('jobmaster.co.il')) return 'jobmaster';
+  if (u.includes('drushim.co.il')) return 'drushim';
+  return 'generic';
+}
 
 export function SettingsForm({ settings, searches, resumes }: { settings: any; searches: Search[]; resumes: Resume[] }) {
   const router = useRouter();
@@ -43,14 +58,26 @@ export function SettingsForm({ settings, searches, resumes }: { settings: any; s
     <div className="mt-8 space-y-6">
       <ResumesPanel resumes={resumes} />
 
-      <Card title="חיפושים" note="כל קישור מדרושים מרחיב את המאגר. הסריקה עוברת על כולם ומאחדת בלי כפילויות.">
+      <Card title="חיפושים" note="כל קישור מרחיב את המאגר. נתמכים דרושים, AllJobs ו-JobMaster. הסריקה עוברת על כולם ומאחדת בלי כפילויות.">
         <ul className="space-y-2">
           {searches.map((s) => (
             <li key={s.id} className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-paper/60 p-3.5 text-sm">
               <div className="min-w-0">
                 <p className="font-bold text-ink">{s.label}</p>
                 <p className="truncate text-xs text-muted" dir="ltr">{s.url}</p>
-                <p className="mt-0.5 text-xs text-muted">{s.max_pages} עמודים · {s.active ? 'פעיל' : 'מושהה'}</p>
+                <p className="mt-0.5 text-xs text-muted">
+                  {BOARD_LABEL[s.board ?? boardFromUrl(s.url)] ?? 'לוח אחר'} · {s.max_pages} עמודים · {s.active ? 'פעיל' : 'מושהה'}
+                </p>
+                {/* לוח שחוסם אותנו חייב להיראות כאן, אחרת הוא נכשל בשקט */}
+                {s.last_error ? (
+                  <p className="mt-1 rounded-lg bg-danger-soft px-2 py-1 text-xs font-semibold text-danger">
+                    הסריקה האחרונה נכשלה: {s.last_error}
+                  </p>
+                ) : s.last_ok_at ? (
+                  <p className="mt-1 text-xs text-good">
+                    נסרק בהצלחה, {s.last_found ?? 0} משרות
+                  </p>
+                ) : null}
               </div>
               <div className="flex shrink-0 flex-col items-end gap-1 text-xs font-bold">
                 <button onClick={() => post({ action: 'toggle-search', id: s.id, active: !s.active }, 'עודכן')} className="text-accent underline">{s.active ? 'השהייה' : 'הפעלה'}</button>
@@ -61,8 +88,9 @@ export function SettingsForm({ settings, searches, resumes }: { settings: any; s
         </ul>
 
         <div className="mt-3 space-y-2 rounded-2xl border-2 border-dashed border-line p-4">
+          <p className="text-xs text-muted">נתמכים דרושים, AllJobs ו-JobMaster. הלוח מזוהה מהקישור.</p>
           <Input label="שם החיפוש" value={newSearch.label} onChange={(v) => setNewSearch({ ...newSearch, label: v })} placeholder="שיווק דיגיטלי, מרכז" />
-          <Input label="קישור מדרושים" value={newSearch.url} onChange={(v) => setNewSearch({ ...newSearch, url: v })} placeholder="https://www.drushim.co.il/jobs/search/..." ltr />
+          <Input label="קישור חיפוש" value={newSearch.url} onChange={(v) => setNewSearch({ ...newSearch, url: v })} placeholder="קישור מדרושים, AllJobs או JobMaster" ltr />
           <label className="block">
             <span className="mb-1 block text-sm font-bold text-ink">עומק סריקה: {newSearch.maxPages} עמודים</span>
             <input type="range" min={1} max={10} value={newSearch.maxPages} onChange={(e) => setNewSearch({ ...newSearch, maxPages: Number(e.target.value) })} className="w-full accent-[#C2410C]" />

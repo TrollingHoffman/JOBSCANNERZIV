@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/supabase';
+import { detectBoard } from '@/lib/boards';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,7 +10,12 @@ export async function POST(req: Request) {
 
     if (body.action === 'add-search') {
       if (!body.url?.includes('drushim.co.il')) return NextResponse.json({ error: 'צריך קישור מאתר דרושים' }, { status: 400 });
-      const { error } = await db.from('searches').insert({ label: body.label || 'חיפוש', url: body.url, max_pages: Math.max(1, Math.min(10, Number(body.maxPages) || 5)) });
+      const { error } = await db.from('searches').insert({
+        label: body.label || 'חיפוש',
+        url: body.url,
+        board: detectBoard(String(body.url ?? '')),
+        max_pages: Math.max(1, Math.min(10, Number(body.maxPages) || 5)),
+      });
       if (error) throw new Error(error.message);
       return NextResponse.json({ ok: true, message: 'החיפוש נוסף' });
     }

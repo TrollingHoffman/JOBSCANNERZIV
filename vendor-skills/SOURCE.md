@@ -1,0 +1,57 @@
+# SOURCE — סקילים חיצוניים
+
+נרשם לפי `skill-forge`. שלושה ריפו נבדקו ב-15 בנובמבר 2026.
+
+| סקיל | מקור | רישיון | סטטוס |
+|---|---|---|---|
+| `emil-design-eng` | https://github.com/emilkowalski/skills | **MIT** (Emil Kowalski) | 🧩 **אומץ, טקסט בלבד** |
+| `design-taste-frontend` | https://github.com/Leonxlnx/taste-skill | **MIT** (Leonxlnx) | 🗺️ **ממופה חלקית, בלי hooks ובלי סקריפטים** |
+| `impeccable` | https://github.com/pbakaus/impeccable | **Apache-2.0** (NOTICE נשמר) | 🗺️ **ממופה, לא הוחל** |
+
+## Step 3, שער רישיון
+
+שלושתם עברו. Apache-2.0 של impeccable דורש שמירת `LICENSE` ו-`NOTICE`,
+ולכן הוא לא הועתק לפרויקט אלא רק נקרא.
+
+## Step 4, ביקורת אבטחה
+
+| בדיקה | תוצאה |
+|---|---|
+| תווי אפס-רוחב / bidi נסתרים | **נקי בשלושתם.** נבדק ספציפית כי הפרויקט עברית RTL, ותו bidi נסתר בקובץ הנחיות היה נבלע בלי להיראות |
+| `curl \| sh` | לא נמצא |
+| base64 / קוד מעורפל | לא נמצא |
+| exfiltration של סודות | לא נמצא |
+
+### ממצא: `design-taste-frontend` מריץ קוד אוטומטית
+
+ה-frontmatter שלו מגדיר **hook מסוג Stop** שמריץ `node gate.mjs` בסיום כל פעולה.
+הסקריפטים שלו: `consistency.mjs` במשקל **1MB** ו-`gate.mjs` במשקל 68KB, שניהם
+בנדלים שאי אפשר לקרוא ולאמת בפועל.
+
+`skill-forge` קובע: *"never ship a script that wasn't reviewed"*, ו*"anything
+needing a setup script is mapped, not auto-installed"*.
+
+**החלטה: ה-hooks לא הותקנו ואף סקריפט לא רץ.** נלקחו ממנו רק כללי
+המיקרו-אינטראקציה (House rule 5: כרטיס מתרומם, כפתור נלחץ).
+
+### `impeccable` לא הוחל, ובכוונה
+
+`DESIGN.md` שלו הוא מערכת הטוקנים של **המותג שלהם** (kinpaku gold על lacquer
+black), לא הנחיה כללית. העתקה שלו לאתר של זיו הייתה משכפלת זהות של מוצר אחר,
+וזה בדיוק מה ש-R-30 אוסר, וגם סותר את `DESIGN.md` שלנו.
+הערך הגנרי שלו יושב מאחורי `npx impeccable install`, שלא הורץ.
+
+## מה אומץ בפועל מ-`emil-design-eng`
+
+טקסט בלבד, והוחל על הקוד:
+
+- **עקומות האטה מותאמות** כטוקנים: `--ease-out: cubic-bezier(0.23, 1, 0.32, 1)`.
+  ברירות המחדל של CSS חלשות מדי.
+- **`scale(0.97)` בלחיצה** על כל כפתור. זה הדבר היחיד שגורם לממשק להרגיש
+  שהוא שמע את הלחיצה.
+- **ריחוף מאחורי `@media (hover: hover) and (pointer: fine)`**, כי במגע
+  ריחוף נדלק בלחיצה ונתקע דלוק.
+- **יציאה מהירה מכניסה** (toast: כניסה 280ms, יציאה 220ms).
+- **transition ולא keyframes** לאלמנטים שאפשר להפעיל ברצף, כי transition
+  ניתן לקטיעה והיפוך באמצע ו-keyframes מתחיל מאפס.
+- **מודל שומר `transform-origin: center`**, שזה החריג שהסקיל מציין במפורש.

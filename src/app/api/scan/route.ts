@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { db, primaryResume } from '@/lib/supabase';
-import { collectJobRefs, fetchJobDetail, sleep, type JobRef } from '@/lib/drushim';
+import { sleep } from '@/lib/drushim';
+import { collectRefs, detectBoard, boardLabel, type BoardId, type BoardJobRef } from '@/lib/boards';
+import { fetchBoardDetail } from '@/lib/boardDetail';
 import { analyzeJob } from '@/lib/scoring';
 import { sendDigest } from '@/lib/email';
 
@@ -36,14 +38,38 @@ async function runScan() {
     const resume = await primaryResume();
     if (!searches?.length) throw new Error('לא הוגדר אף חיפוש.');
 
-    const refs = new Map<string, JobRef>();
-    for (const s of searches) (await collectJobRefs(s.url, s.max_pages ?? 3)).forEach((r) => refs.set(r.externalId, r));
+    // כל חיפוש נסרק לפי הלוח שלו, והתוצאה נרשמת על החיפוש עצמו.
+    // לוח שחוסם אותנו חייב להיות גלוי בהגדרות ולא להיכשל בשקט.
+    const refs = new Map<string, { ref: BoardJobRef; board: BoardId }>();
+
+    for (const s of searches) {
+      const board: BoardId = (s.board as BoardId) || detectBoard(s.url);
+      try {
+        const found = await collectRefs(s.url, board, s.max_pages ?? 3);
+        found.forEach((r) => {
+          // דרושים שומר מזהה חשוף מההתחלה, ו-159 המשרות הקיימות שמורות כך.
+          // הוספת קידומת להן הייתה גורמת לכולן להיראות חדשות ולהיכפל.
+          // לוחות חדשים כן מקבלים קידומת, כדי ששני לוחות עם אותו מספר לא יתנגשו.
+          const key = board === 'drushim' ? r.externalId : `${board}:${r.externalId}`;
+          refs.set(key, { ref: r, board });
+        });
+        await db.from('searches').update({
+          last_ok_at: new Date().toISOString(), last_error: null, last_found: found.length,
+        }).eq('id', s.id);
+      } catch (e: any) {
+        const msg = `${boardLabel(board)}: ${String(e?.message ?? e)}`;
+        await db.from('searches').update({ last_error: msg, last_found: 0 }).eq('id', s.id);
+        if (!firstAnalysisError) firstAnalysisError = msg;
+      }
+    }
     stats.found = refs.size;
 
+    // המזהה במסד נושא את הלוח, כדי ששתי משרות שונות עם אותו מספר
+    // בשני לוחות לא ייחשבו לאותה משרה.
     const ids = [...refs.keys()];
     const { data: existing } = await db.from('jobs').select('id, external_id, last_seen_at, repost_dates').in('external_id', ids.length ? ids : ['__none__']);
     const known = new Map((existing ?? []).map((j: any) => [j.external_id, j]));
-    const newRefs = [...refs.values()].filter((r) => !known.has(r.externalId));
+    const newRefs = [...refs.entries()].filter(([key]) => !known.has(key));
 
     // סימון "נראתה שוב" בקריאה אחת לכל המשרות המוכרות, במקום קריאה לכל משרה.
     // רק פרסום חוזר, שהוא נדיר, מטופל בנפרד.
@@ -72,16 +98,16 @@ async function runScan() {
     }
 
     const analyzed: any[] = [];
-    for (const ref of newRefs) {
+    for (const [key, { ref, board }] of newRefs) {
       let detail;
-      try { detail = await fetchJobDetail(ref); } catch { continue; }
+      try { detail = await fetchBoardDetail(ref, board); } catch { continue; }
       await sleep(400 + Math.random() * 300);
 
       const row: Record<string, any> = {
-        external_id: detail.externalId, url: detail.url, title: detail.title,
+        external_id: key, url: detail.url, title: detail.title,
         company: detail.company, location: detail.location, scope: detail.scope,
         experience: detail.experience, description: detail.description, requirements: detail.requirements,
-        logo_url: detail.logoUrl, posted_at: detail.postedAt ?? today, source: 'drushim',
+        posted_at: detail.postedAt ?? today, source: board,
       };
 
       if (resume?.content) {
