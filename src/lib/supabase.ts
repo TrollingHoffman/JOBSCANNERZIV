@@ -3,7 +3,26 @@ import { createClient } from '@supabase/supabase-js';
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-export const db = createClient(url ?? 'https://placeholder.supabase.co', key ?? 'placeholder', { auth: { persistSession: false } });
+/**
+ * Next מחליף את fetch הגלובלי ושומר תשובות במטמון משלו. supabase-js משתמש
+ * ב-fetch הזה, ולכן שאילתות חוזרות על אותה כתובת הוחזרו מהמטמון במקום מהמסד.
+ *
+ * ככה המונה "עוברות את הסף" הציג 72 בזמן שבמסד כבר היו 80: שאילתת הספירה
+ * נשלחת כ-HEAD על כתובת קבועה, ולכן היא נתפסה במטמון, בעוד שאילתת הרשימה
+ * חזרה טרייה. `force-dynamic` לא מכסה את זה.
+ *
+ * כאן כל קריאה למסד מסומנת no-store במפורש. אסור להסיר את זה.
+ */
+export const db = createClient(
+  url ?? 'https://placeholder.supabase.co',
+  key ?? 'placeholder',
+  {
+    auth: { persistSession: false },
+    global: {
+      fetch: (input: any, init?: any) => fetch(input, { ...init, cache: 'no-store' }),
+    },
+  }
+);
 
 export type Resume = {
   id: string; label: string; filename: string | null; content: string;
