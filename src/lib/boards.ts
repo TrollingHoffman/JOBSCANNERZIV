@@ -50,9 +50,11 @@ export const BOARDS: Record<Exclude<BoardId, 'generic'>, BoardSpec> = {
   },
   alljobs: {
     label: 'AllJobs',
-    // AllJobs מפרסם משרה גם בנתיב המובייל וגם בעמוד הקלאסי
-    jobLink: /\/(?:m\/p\/)?jobs?\/(\d{5,})/g,
-    jobUrl: (id) => `https://www.alljobs.co.il/m/p/jobs/${id}`,
+    // הדפוס האמיתי, נקרא מהעמוד עצמו ולא מניחוש:
+    // /Search/UploadSingle.aspx?JobID=8865845
+    // נתיב המובייל /m/p/jobs/{id} קיים גם הוא ומטופל כאן.
+    jobLink: /(?:JobID=(\d{5,})|\/m\/p\/jobs\/(\d{5,}))/g,
+    jobUrl: (id) => `https://www.alljobs.co.il/Search/UploadSingle.aspx?JobID=${id}`,
     pageParam: 'page',
   },
   jobmaster: {
@@ -109,8 +111,11 @@ export function extractRefs(html: string, board: BoardId): BoardJobRef[] {
     const re = new RegExp(spec.jobLink.source, 'g');
     let m: RegExpExecArray | null;
     while ((m = re.exec(html)) !== null) {
-      const id = m[1];
-      if (!seen.has(id)) seen.set(id, { externalId: id, url: spec.jobUrl(id, m[2] ?? '') });
+      // דפוס עם כמה חלופות: לוקחים את הקבוצה שנתפסה בפועל
+      const id = m.slice(1).find((g) => g && /^\d+$/.test(g));
+      if (!id || seen.has(id)) continue;
+      const extra = m.slice(1).find((g) => g && !/^\d+$/.test(g)) ?? '';
+      seen.set(id, { externalId: id, url: spec.jobUrl(id, extra) });
     }
     return [...seen.values()];
   }
