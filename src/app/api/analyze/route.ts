@@ -9,12 +9,28 @@ export const dynamic = 'force-dynamic';
  * מנתח משרות ללא ציון עד תקריב הזמן של הפונקציה,
  * ומחזיר כמה נשארו. הלקוח ממשיך לקרוא עד שהשארית אפס.
  */
+/**
+ * קריאה מתוזמנת. pg_cron קורא לזה אחרי כל סריקה, כך שמשרות חדשות
+ * מקבלות ציון בלי שאף אחד ילחץ על כפתור.
+ */
+export async function GET(req: Request) {
+  const secret = process.env.CRON_SECRET;
+  if (!secret || req.headers.get('authorization') !== `Bearer ${secret}`) {
+    return NextResponse.json({ error: 'לא מורשה' }, { status: 401 });
+  }
+  return run({});
+}
+
 export async function POST(req: Request) {
+  const body = await req.json().catch(() => ({}));
+  return run(body);
+}
+
+async function run(body: any) {
   const startedAt = Date.now();
   const BUDGET_MS = 240000;
 
   try {
-    const body = await req.json().catch(() => ({}));
     const resume = await primaryResume();
     if (!resume?.content) {
       return NextResponse.json({ error: 'לא נמצאה גרסת קורות חיים ראשית. יש להעלות אחת בהגדרות.' }, { status: 400 });
