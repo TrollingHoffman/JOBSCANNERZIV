@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { THRESHOLD } from '@/lib/constants';
 
-export const THRESHOLD = 65;
+export { THRESHOLD };
 
 /**
  * מד ההתאמה: ה-identity motif של המוצר (DESIGN.md).

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { MatchMeter, THRESHOLD } from './MatchMeter';
+import { MatchMeter } from './MatchMeter';
+import { THRESHOLD } from '@/lib/constants';
 import { JobDetail } from './JobDetail';
 import { Logo } from './Logo';
 import { arrival } from './JobCard';

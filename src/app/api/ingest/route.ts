@@ -16,6 +16,7 @@ type Parsed = {
   experience: string | null;
   description: string | null;
   requirements: string | null;
+  recruiter: string | null;
   is_job: boolean;
   reject_reason: string | null;
 };
@@ -81,6 +82,7 @@ export async function POST(req: Request) {
 1. אל תמציא שום שדה. אם שדה לא מופיע בטקסט, החזר null.
 2. אם הטקסט אינו מודעת דרושים בכלל (למשל פוסט כללי, מאמר, או עמוד שגיאה), החזר is_job=false ונמק ב-reject_reason בעברית.
 3. description הוא תיאור התפקיד. requirements הן הדרישות. אל תערבב ביניהם.
+3א. recruiter הוא שם האדם שמפרסם או שאליו פונים, אם הוא מופיע. בפוסט בלינקדאין זה בדרך כלל מי שכתב אותו. אם אין שם אדם, החזר null. אל תנחש ואל תמציא שם.
 4. שמור על הנוסח המקורי של התיאור והדרישות, בלי לקצר ובלי לשפר.
 5. הכל בעברית אם המקור בעברית. אם המקור באנגלית, השאר באנגלית.
 
@@ -88,7 +90,7 @@ export async function POST(req: Request) {
 ${text.slice(0, 14000)}
 
 החזר JSON בלבד:
-{"is_job":true,"reject_reason":null,"title":"","company":null,"location":null,"scope":null,"experience":null,"description":null,"requirements":null}`
+{"is_job":true,"reject_reason":null,"title":"","company":null,"location":null,"scope":null,"experience":null,"description":null,"requirements":null,"recruiter":null}`
     );
 
     if (!parsed?.is_job || !parsed?.title) {
@@ -118,6 +120,7 @@ ${text.slice(0, 14000)}
       experience: parsed.experience,
       description: parsed.description,
       requirements: parsed.requirements,
+      recruiter: parsed.recruiter,
       posted_at: new Date().toISOString().slice(0, 10),
       source,
     };

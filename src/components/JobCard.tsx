@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { MatchMeter } from './MatchMeter';
 import { JobDetail } from './JobDetail';
 import { Logo } from './Logo';
+import { SourceLine } from './SourceLine';
 import { useJobStatus } from '@/lib/useJobStatus';
 import type { Job } from '@/lib/supabase';
 
@@ -66,11 +67,13 @@ export function JobCard({ job, resumeCount = 0 }: { job: Job; resumeCount?: numb
         </h3>
         {job.company && <p className="mt-1 text-sm font-semibold text-accent-ink">{job.company}</p>}
 
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          {[job.location, job.scope].filter(Boolean).map((m) => (
-            <span key={m as string} className="rounded-lg bg-paper px-2 py-0.5 text-xs text-body">{m}</span>
-          ))}
-        </div>
+        <SourceLine job={job} className="mt-1.5" />
+
+        {job.scope && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            <span className="rounded-lg bg-paper px-2 py-0.5 text-xs text-body">{job.scope}</span>
+          </div>
+        )}
 
         {(job.summary || job.description) && (
           <p className="clamp-3 mt-3 text-sm leading-relaxed text-body">{job.summary ?? job.description}</p>

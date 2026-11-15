@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from './Toast';
 import type { Job } from '@/lib/supabase';
-
-const DAYS_BEFORE_NUDGE = 5;
+import { FOLLOW_UP_DAYS as DAYS_BEFORE_NUDGE } from '@/lib/constants';
 
 /**
  * מעקב אחרי הגשה.

@@ -8,7 +8,7 @@ import { AgentBrief } from './AgentBrief';
 import { InterviewPrep } from './InterviewPrep';
 import { FollowUp } from './FollowUp';
 import { Logo } from './Logo';
-import { sourceLabel } from '@/lib/sources';
+import { SourceLine } from './SourceLine';
 import { useJobStatus } from '@/lib/useJobStatus';
 import type { Job } from '@/lib/supabase';
 
@@ -54,7 +54,6 @@ export function JobDetail({
     };
   }, [onClose]);
 
-  const src = sourceLabel(job.source);
 
   return (
     <div
@@ -84,7 +83,8 @@ export function JobDetail({
                 <span key={m as string} className="rounded-lg bg-paper px-2 py-0.5 text-xs text-body">{m}</span>
               ))}
             </div>
-            <p className="mt-2 text-xs text-muted">נקלטה {arrivalLabel} · מתוך {src}</p>
+            <SourceLine job={job} className="mt-2" />
+            <p className="mt-1 text-xs text-muted">נקלטה {arrivalLabel}</p>
           </div>
           <button
             ref={closeBtn}
@@ -107,25 +107,28 @@ export function JobDetail({
         </div>
 
         <div className="space-y-6 p-6">
-          {job.summary && <p className="leading-relaxed text-body">{job.summary}</p>}
+          {!!tidy(job.summary) && <p className="leading-relaxed text-body">{tidy(job.summary)}</p>}
 
-          {job.description && (
+          {!!tidy(job.description) && (
             <section className="rounded-2xl bg-paper/60 p-5">
               <h3 className="mb-2 font-display text-lg font-bold text-ink">תיאור המשרה</h3>
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-body">{job.description}</p>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-body">{tidy(job.description)}</p>
             </section>
           )}
-          {job.requirements && (
+          {!!tidy(job.requirements) && (
             <section className="rounded-2xl bg-paper/60 p-5">
               <h3 className="mb-2 font-display text-lg font-bold text-ink">דרישות התפקיד</h3>
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-body">{job.requirements}</p>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-body">{tidy(job.requirements)}</p>
             </section>
           )}
 
-          <div className="grid gap-6 sm:grid-cols-2">
-            <Bullets title="תחומי אחריות" items={job.responsibilities} />
-            <Bullets title="דרישות מרכזיות" items={job.key_requirements} />
-          </div>
+          {/* עמודה שנשארת ריקה יוצרת חור בפריסה, אז הגריד נפתח רק כששני הצדדים מלאים */}
+          {(!!job.responsibilities?.length || !!job.key_requirements?.length) && (
+            <div className={`grid gap-6 ${job.responsibilities?.length && job.key_requirements?.length ? 'sm:grid-cols-2' : ''}`}>
+              <Bullets title="תחומי אחריות" items={job.responsibilities} />
+              <Bullets title="דרישות מרכזיות" items={job.key_requirements} />
+            </div>
+          )}
 
           {job.score_reasons && (
             <div className="grid gap-4 sm:grid-cols-2">
@@ -195,6 +198,22 @@ export function JobDetail({
       </div>
     </div>
   );
+}
+
+
+/**
+ * הטקסט שמגיע מדרושים מכיל רצפים של שורות ריקות, ו-whitespace-pre-wrap
+ * הופך אותם לשטח ריק גבוה בתוך הפופאפ. מכווצים לפני ההצגה.
+ */
+function tidy(text: string | null): string {
+  if (!text) return '';
+  return text
+    .replace(/\r/g, '')
+    .split('\n')
+    .map((l) => l.trim())
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
 function Bullets({ title, items }: { title: string; items: string[] }) {
