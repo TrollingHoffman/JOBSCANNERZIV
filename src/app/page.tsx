@@ -25,7 +25,8 @@ export default async function Home({ searchParams }: { searchParams: { view?: st
   const sort = searchParams.sort ?? 'score';
   const freshCutoff = new Date(Date.now() - FRESH_HOURS * 3600000).toISOString();
 
-  let q: any = db.from('jobs').select('*');
+  // מוסתרות לא מופיעות בשום תצוגה ולא נספרות בשום מונה
+  let q: any = db.from('jobs').select('*').neq('status', 'hidden');
   if (view === 'saved') q = q.eq('status', 'saved');
   if (view === 'applied') q = q.eq('status', 'applied');
   if (view === 'fresh') q = q.gte('first_seen_at', freshCutoff);
@@ -37,13 +38,14 @@ export default async function Home({ searchParams }: { searchParams: { view?: st
   const { data } = await q.limit(300);
   const jobs = (data ?? []) as Job[];
 
+  const visible = (x: any) => x.neq('status', 'hidden');
   const [total, strong, savedCount, appliedCount, pending, freshCount, resumeCount] = await Promise.all([
-    jobCount(),
-    jobCount((x) => x.gte('score', THRESHOLD)),
+    jobCount(visible),
+    jobCount((x) => visible(x).gte('score', THRESHOLD)),
     jobCount((x) => x.eq('status', 'saved')),
     jobCount((x) => x.eq('status', 'applied')),
-    jobCount((x) => x.is('score', null)),
-    jobCount((x) => x.gte('first_seen_at', freshCutoff)),
+    jobCount((x) => visible(x).is('score', null)),
+    jobCount((x) => visible(x).gte('first_seen_at', freshCutoff)),
     db.from('resumes').select('*', { count: 'exact', head: true }).then((r) => r.count ?? 0),
   ]);
 

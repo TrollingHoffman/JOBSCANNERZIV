@@ -36,7 +36,8 @@ async function run(body: any) {
       return NextResponse.json({ error: 'לא נמצאה גרסת קורות חיים ראשית. יש להעלות אחת בהגדרות.' }, { status: 400 });
     }
 
-    let q: any = db.from('jobs').select('*');
+    // משרה מוסתרת לא תוצג לזיו, ולכן אין סיבה לשרוף עליה מכסת ניתוח
+    let q: any = db.from('jobs').select('*').neq('status', 'hidden');
     if (!body.redoAll) q = q.is('score', null);
     const { data: jobs } = await q.limit(60);
 
