@@ -16,14 +16,14 @@ export function Logo({ job, large }: { job: Job; large?: boolean }) {
         width={px}
         height={px}
         loading="lazy"
-        className={`${box} shrink-0 rounded-2xl border border-line bg-white object-contain p-1.5`}
+        className={`${box} logo-lift shrink-0 rounded-2xl border border-line bg-white object-contain p-1.5`}
       />
     );
   }
 
   return (
     <div
-      className={`${box} flex shrink-0 items-center justify-center rounded-2xl border border-line bg-paper font-display font-bold text-accent-ink`}
+      className={`${box} logo-lift flex shrink-0 items-center justify-center rounded-2xl border border-line bg-paper font-display font-bold text-accent-ink`}
       aria-hidden="true"
     >
       {(job.company ?? job.title).trim().charAt(0)}

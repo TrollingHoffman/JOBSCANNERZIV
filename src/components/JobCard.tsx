@@ -27,18 +27,28 @@ export function JobCard({ job, resumeCount = 0 }: { job: Job; resumeCount?: numb
       {/* R-39: הכרטיס הוא כפתור אמיתי ולא div שאפשר ללחוץ עליו,
           כך שהוא נגיש במקלדת ומכריז על עצמו נכון. */}
       <article
-        className={`card-hover relative flex h-full flex-col rounded-3xl border bg-surface p-5 shadow-card focus-within:shadow-lift hover:shadow-lift ${
+        className={`card-hover group relative flex h-full flex-col rounded-3xl border bg-surface p-5 shadow-card focus-within:shadow-lift hover:shadow-lift ${
           a.fresh ? 'border-flame/35 hover:border-flame' : 'border-line hover:border-ink/25'
         }`}
       >
-        <div className="flex items-start justify-between gap-3">
+        {/* כפתור אמיתי שפרוס על כל הכרטיס, ולא ::after.
+            ניסיתי קודם stretched link עם pseudo-element: elementFromPoint אמנם
+            החזיר את הכפתור, אבל אירוע הלחיצה בפועל נשלח ל-article, ולכן הכרטיס
+            לא נפתח. אלמנט אמיתי עובד, נגיש במקלדת, ונושא שם אחד. */}
+        <button
+          onClick={() => setOpen(true)}
+          aria-label={`פתיחת המשרה ${job.title}`}
+          className="absolute inset-0 z-[1] rounded-3xl"
+        />
+
+        <div className="relative flex items-start justify-between gap-3">
           <Logo job={job} />
           <button
             onClick={() => set(saved ? 'new' : 'saved')}
             disabled={busy}
             aria-pressed={saved}
             aria-label={saved ? `הסרת ${job.title} מהמשרות שאהבתי` : `שמירת ${job.title} למשרות שאהבתי`}
-            className={`tap relative z-10 rounded-full transition disabled:opacity-50 ${
+            className={`tap relative z-[2] rounded-full transition disabled:opacity-50 ${
               saved ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-paper hover:text-accent'
             } ${justSaved ? 'pop' : ''}`}
           >
@@ -53,6 +63,9 @@ export function JobCard({ job, resumeCount = 0 }: { job: Job; resumeCount?: numb
           {applied && (
             <span className="rounded-full bg-good-soft px-2.5 py-1 text-xs font-bold text-good">הוגשה</span>
           )}
+          {job.rating && (job.score ?? 0) >= 80 && (
+            <span className="rounded-full bg-peak-soft px-2.5 py-1 text-xs font-bold text-peak">{job.rating}</span>
+          )}
           {job.repost_dates?.length > 0 && (
             <span className="rounded-full bg-amber-soft px-2.5 py-1 text-xs font-bold text-amber">
               פורסמה מחדש ({job.repost_dates.length})
@@ -60,10 +73,8 @@ export function JobCard({ job, resumeCount = 0 }: { job: Job; resumeCount?: numb
           )}
         </div>
 
-        <h3 className="mt-2 font-display text-base font-bold leading-snug text-ink">
-          <button onClick={() => setOpen(true)} className="card-link clamp-2 text-right transition hover:text-accent-ink">
-            {job.title}
-          </button>
+        <h3 className="mt-2 font-display text-base font-bold leading-snug text-ink transition group-hover:text-accent-ink">
+          <span className="clamp-2">{job.title}</span>
         </h3>
         {job.company && <p className="mt-1 text-sm font-semibold text-accent-ink">{job.company}</p>}
 
@@ -81,7 +92,7 @@ export function JobCard({ job, resumeCount = 0 }: { job: Job; resumeCount?: numb
 
         {/* הבאזוורדים נחשפים בריחוף או בפוקוס. מידע, לא קישוט, ולכן הם לא רצים בלופ. */}
         {job.buzzwords?.length > 0 && (
-          <div className="peek relative z-10">
+          <div className="peek relative z-[2]">
             <div className="flex flex-wrap gap-1">
               {job.buzzwords.slice(0, 6).map((b) => (
                 <span key={b} className="rounded-full bg-accent-soft px-2 py-0.5 text-[11px] font-semibold text-accent-ink">{b}</span>

@@ -1,4 +1,5 @@
 import * as cheerio from 'cheerio';
+import { cleanDescription, cleanRequirements } from './jobText';
 
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36';
 
@@ -103,8 +104,13 @@ export function parseJobPage(html: string, ref: JobRef, now = new Date()): JobDe
     location: firstMatch(bodyText, LOCATION_HINT),
     scope: firstMatch(bodyText, SCOPE_HINT),
     experience: firstMatch(bodyText, EXPERIENCE_HINT),
-    description: sliceSection(bodyText, DESC, [...REQ, ...TAIL]) || metaDescription($),
-    requirements: sliceSection(bodyText, REQ, TAIL),
+    // מנקים כבר בשמירה, כדי שמשרות חדשות לא יגיעו עם כפילות
+    // ועם ריהוט של האתר בתוך שדה הדרישות
+    description: cleanDescription(sliceSection(bodyText, DESC, [...REQ, ...TAIL]) || metaDescription($)) || null,
+    requirements: cleanRequirements(
+      sliceSection(bodyText, REQ, TAIL),
+      sliceSection(bodyText, DESC, [...REQ, ...TAIL]) || metaDescription($)
+    ) || null,
     logoUrl: logoUrl && logoUrl.startsWith('http') ? logoUrl : null,
     postedAt: relative ? parseRelativeDate(relative, now) : null,
   };

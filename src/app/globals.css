@@ -26,6 +26,25 @@ body { background: #F7F4EF; color: #17171C; -webkit-font-smoothing: antialiased;
 .reveal { opacity: 0; transform: translateY(var(--reveal-y, 20px)); transition: opacity .55s var(--ease-out), transform .55s var(--ease-out); }
 .reveal.shown { opacity: 1; transform: none; }
 
+/* עומק בכותרת הכהה.
+   R-01 פוסל זוהר רקע כברירת מחדל בלי סיבה. הסיבה כאן: זה רגע הכניסה היחיד
+   בדף, והוא מסמן אותו. מינון: אלמנט אחד בכל האתר, ולא חוזר בשום מקום אחר. */
+.hero-depth { position: relative; isolation: isolate; }
+.hero-depth::before {
+  content: '';
+  position: absolute;
+  inset: -20% -10% 30% 40%;
+  z-index: -1;
+  background: radial-gradient(60% 60% at 70% 30%, rgba(194, 65, 12, .28), transparent 70%);
+  pointer-events: none;
+}
+
+/* הלוגו גדל מעט כשעוברים על הכרטיס. סימן קטן שהכרטיס חי ומגיב. */
+@media (hover: hover) and (pointer: fine) {
+  .card-hover .logo-lift { transition: transform .25s var(--ease-out); }
+  .card-hover:hover .logo-lift { transform: scale(1.06); }
+}
+
 /* ---- כוריאוגרפיית הכניסה ----
    כניסה אחת לכל מיכל, והתפקידים נקבעים לפי חשיבות ולא לפי סדר ב-DOM:
    lead זז הכי הרבה, support פחות, decoration רק נדלק.
@@ -79,9 +98,9 @@ body { background: #F7F4EF; color: #17171C; -webkit-font-smoothing: antialiased;
   .card-hover:hover { transform: translateY(-4px); }
 }
 
-/* R-03: שטח הנגיעה של "פתיחת המשרה" הוא כל הכרטיס, ולא שורת הכותרת בלבד.
-   נשאר כפתור אחד אמיתי, כך שגם המקלדת וגם קורא מסך מקבלים שם אחד נכון. */
-.card-link::after { content: ''; position: absolute; inset: 0; z-index: 1; }
+/* R-03: שטח הנגיעה של "פתיחת המשרה" הוא כל הכרטיס.
+   נעשה בכפתור אמיתי שפרוס על הכרטיס, ולא ב-::after: שם אירוע הלחיצה
+   נשלח ל-article במקום לכפתור, והכרטיס לא נפתח. */
 /* כל כפתור אייקון עומד במינימום של 44 פיקסל, גם כשהאייקון קטן. */
 .tap { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
 

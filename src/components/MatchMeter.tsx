@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { THRESHOLD } from '@/lib/constants';
+import { THRESHOLD, PEAK } from '@/lib/constants';
 
 export { THRESHOLD };
 
@@ -76,6 +76,7 @@ export function MatchMeter({
 
   const clamped = Math.max(0, Math.min(100, score));
   const strong = clamped >= THRESHOLD;
+  const peak = clamped >= PEAK;
   const h = size === 'lg' ? 'h-2.5' : size === 'sm' ? 'h-1' : 'h-1.5';
   const num = size === 'lg' ? 'text-2xl' : size === 'sm' ? 'text-xs' : 'text-sm';
 
@@ -84,7 +85,7 @@ export function MatchMeter({
       <div className="flex items-center gap-2.5">
         <div className={`relative flex-1 overflow-hidden rounded-full bg-line ${h}`}>
           <div
-            className={`meter-bar h-full w-full rounded-full ${strong ? 'bg-good' : 'bg-weak'}`}
+            className={`meter-bar h-full w-full rounded-full ${peak ? 'bg-peak' : strong ? 'bg-good' : 'bg-weak'}`}
             style={{ ['--fill' as string]: clamped / 100 }}
           />
           {/* החריץ: הסף של זיו. הדבר שהופך את הפס למד ולא לבר התקדמות. */}
@@ -96,15 +97,19 @@ export function MatchMeter({
         </div>
         {showNumber && (
           <span
-            className={`shrink-0 font-display font-bold leading-none tabular-nums ${num} ${strong ? 'text-good' : 'text-muted'}`}
+            className={`shrink-0 font-display font-bold leading-none tabular-nums ${num} ${peak ? 'text-peak' : strong ? 'text-good' : 'text-muted'}`}
             aria-label={`ציון התאמה ${clamped} מתוך 100`}
           >
             {display ?? clamped}
           </span>
         )}
       </div>
-      <p className={`mt-1 font-semibold ${size === 'lg' ? 'text-sm' : 'text-[11px]'} ${strong ? 'text-good' : 'text-muted'}`}>
-        {strong ? `עובר את הסף ב-${clamped - THRESHOLD} נקודות` : `חסרות ${THRESHOLD - clamped} נקודות לסף`}
+      <p className={`mt-1 font-semibold ${size === 'lg' ? 'text-sm' : 'text-[11px]'} ${peak ? 'text-peak' : strong ? 'text-good' : 'text-muted'}`}>
+        {peak
+          ? `התאמה מצוינת, ${clamped - THRESHOLD} נקודות מעל הסף`
+          : strong
+            ? `עובר את הסף ב-${clamped - THRESHOLD} נקודות`
+            : `חסרות ${THRESHOLD - clamped} נקודות לסף`}
       </p>
     </div>
   );

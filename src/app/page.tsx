@@ -75,7 +75,7 @@ export default async function Home({ searchParams }: { searchParams: { view?: st
     <>
       {/* הכניסה. רחבה, כהה וחמה, עם טיפוגרפיה גדולה.
           זה הרגע שבו זיו פותחת את האתר, והוא צריך להרגיש כמו משהו ולא כמו טבלה. */}
-      <header className="bg-night text-white">
+      <header className="hero-depth bg-night text-white">
         <div className="mx-auto max-w-6xl px-4 pb-8 pt-6 sm:px-6 sm:pb-10 sm:pt-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="enter enter-fade text-xs text-white/50">

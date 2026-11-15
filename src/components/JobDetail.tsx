@@ -9,6 +9,7 @@ import { InterviewPrep } from './InterviewPrep';
 import { FollowUp } from './FollowUp';
 import { Logo } from './Logo';
 import { SourceLine } from './SourceLine';
+import { cleanDescription, cleanRequirements } from '@/lib/jobText';
 import { useJobStatus } from '@/lib/useJobStatus';
 import type { Job } from '@/lib/supabase';
 
@@ -28,6 +29,8 @@ export function JobDetail({
   fresh: boolean;
 }) {
   const { applied, set, busy } = useJobStatus(job);
+  const desc = cleanDescription(job.description);
+  const reqs = cleanRequirements(job.requirements, job.description);
   const panel = useRef<HTMLDivElement>(null);
   const closeBtn = useRef<HTMLButtonElement>(null);
 
@@ -109,16 +112,16 @@ export function JobDetail({
         <div className="space-y-6 p-6">
           {!!tidy(job.summary) && <p className="leading-relaxed text-body">{tidy(job.summary)}</p>}
 
-          {!!tidy(job.description) && (
+          {!!desc && (
             <section className="rounded-2xl bg-paper/60 p-5">
               <h3 className="mb-2 font-display text-lg font-bold text-ink">תיאור המשרה</h3>
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-body">{tidy(job.description)}</p>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-body">{desc}</p>
             </section>
           )}
-          {!!tidy(job.requirements) && (
+          {!!reqs && (
             <section className="rounded-2xl bg-paper/60 p-5">
               <h3 className="mb-2 font-display text-lg font-bold text-ink">דרישות התפקיד</h3>
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-body">{tidy(job.requirements)}</p>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-body">{reqs}</p>
             </section>
           )}
 
